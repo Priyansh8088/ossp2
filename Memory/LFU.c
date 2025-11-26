@@ -12,18 +12,23 @@ void printFrames(int frames[], int n_frames) {
     printf("\n");
 }
 
-// --- LRU Logic ---
-void LRU(int pages[], int n_pages, int n_frames) {
+// --- LFU Logic ---
+void LFU(int pages[], int n_pages, int n_frames) {
     int frames[MAX_FRAMES];
-    int last_used[MAX_FRAMES]; // Stores index when frame was last used
-    for (int i = 0; i < n_frames; i++) frames[i] = -1;
+    int freq[MAX_FRAMES];    // Frequency of pages
+    int arrival[MAX_FRAMES]; // Time of arrival (for FIFO tie-break)
+    
+    for (int i = 0; i < n_frames; i++) {
+        frames[i] = -1;
+        freq[i] = 0;
+    }
 
     int page_faults = 0;
 
     printf("\nRef\tFrames\n");
     for (int i = 0; i < n_pages; i++) {
         printf("%d\t", pages[i]);
-
+        
         int found_idx = -1;
         for (int j = 0; j < n_frames; j++) {
             if (frames[j] == pages[i]) {
@@ -33,33 +38,42 @@ void LRU(int pages[], int n_pages, int n_frames) {
         }
 
         if (found_idx != -1) {
-            last_used[found_idx] = i; // Update usage time
+            freq[found_idx]++;
             printFrames(frames, n_frames);
         } else {
             page_faults++;
-            int lru_idx = -1;
-            int min_time = INT_MAX;
-
-            // Fill empty slots first
+            int victim = -1;
+            
+            // Fill empty slots
             for (int j = 0; j < n_frames; j++) {
                 if (frames[j] == -1) {
-                    lru_idx = j;
+                    victim = j;
                     break;
                 }
             }
 
-            // Find LRU if no empty slots
-            if (lru_idx == -1) {
+            if (victim == -1) {
+                int min_freq = INT_MAX;
+                int min_arrival = INT_MAX;
+
                 for (int j = 0; j < n_frames; j++) {
-                    if (last_used[j] < min_time) {
-                        min_time = last_used[j];
-                        lru_idx = j;
+                    // Find min freq, break ties with FIFO (arrival time)
+                    if (freq[j] < min_freq) {
+                        min_freq = freq[j];
+                        min_arrival = arrival[j];
+                        victim = j;
+                    } else if (freq[j] == min_freq) {
+                        if (arrival[j] < min_arrival) {
+                            min_arrival = arrival[j];
+                            victim = j;
+                        }
                     }
                 }
             }
 
-            frames[lru_idx] = pages[i];
-            last_used[lru_idx] = i;
+            frames[victim] = pages[i];
+            freq[victim] = 1;      
+            arrival[victim] = i;   
             printFrames(frames, n_frames);
         }
     }
@@ -70,7 +84,7 @@ int main() {
     int pages[MAX_PAGES];
     int n_pages, n_frames;
 
-    printf("--- LRU Page Replacement ---\n");
+    printf("--- LFU Page Replacement ---\n");
     printf("Enter number of frames: ");
     scanf("%d", &n_frames);
 
@@ -80,7 +94,7 @@ int main() {
     printf("Enter reference string: ");
     for (int i = 0; i < n_pages; i++) scanf("%d", &pages[i]);
 
-    LRU(pages, n_pages, n_frames);
+    LFU(pages, n_pages, n_frames);
 
     return 0;
 }
