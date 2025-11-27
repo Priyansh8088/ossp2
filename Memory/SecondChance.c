@@ -11,11 +11,11 @@ void printFrames(int frames[], int n_frames) {
     printf("\n");
 }
 
-// --- Second Chance Logic ---
+
 void SecondChance(int pages[], int n_pages, int n_frames) {
     int frames[MAX_FRAMES];
-    int ref_bit[MAX_FRAMES]; // 0 or 1
-    int ptr = 0; // Clock pointer
+    int ref_bit[MAX_FRAMES]; 
+    int ptr = 0; 
     int page_faults = 0;
 
     for (int i = 0; i < n_frames; i++) {
@@ -36,25 +36,25 @@ void SecondChance(int pages[], int n_pages, int n_frames) {
         }
 
         if (found_idx != -1) {
-            ref_bit[found_idx] = 1; // Give second chance
+            ref_bit[found_idx] = 1; 
             printFrames(frames, n_frames);
         } else {
             page_faults++;
             
             while (1) {
-                if (frames[ptr] == -1) { // Empty slot found
+                if (frames[ptr] == -1) { 
                     frames[ptr] = pages[i];
                     ref_bit[ptr] = 1; 
                     ptr = (ptr + 1) % n_frames;
                     break;
                 }
 
-                if (ref_bit[ptr] == 0) { // No second chance, replace
+                if (ref_bit[ptr] == 0) { 
                     frames[ptr] = pages[i];
                     ref_bit[ptr] = 1;
                     ptr = (ptr + 1) % n_frames;
                     break;
-                } else { // Has second chance, clear bit and move on
+                } else { 
                     ref_bit[ptr] = 0;
                     ptr = (ptr + 1) % n_frames;
                 }

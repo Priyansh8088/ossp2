@@ -19,11 +19,9 @@ int maximum[P][R] = {
 };
 
 int available[R] = {10,5,7};
-int need[P][R]; // Need matrix
+int need[P][R]; 
 
-// ------------------------------------------------------
-// FUNCTION 1: Calculate Need matrix
-// ------------------------------------------------------
+
 void calculateNeed() {
     for(int i=0; i<P; i++) {
         for(int j=0; j<R; j++) {
@@ -40,9 +38,7 @@ void calculateNeed() {
     }
 }
 
-// ------------------------------------------------------
-// FUNCTION 2: Safety Check (Banker's main function)
-// ------------------------------------------------------
+
 int isSafe() {
     int finish[P] = {0};
     int work[R];
@@ -78,36 +74,33 @@ int isSafe() {
     return 1; // safe
 }
 
-// ------------------------------------------------------
-// FUNCTION 3: Request Resources
-// ------------------------------------------------------
+
 void requestResources(int p, int request[]) {
-    // Rule 1: Request <= Need
+
     for(int j=0; j<R; j++) {
         if(request[j] > need[p][j]) {
             printf("Error: Request exceeds Need.\n");
             return;
         }
     }
-    // Rule 2: Request <= Available
+  
     for(int j=0; j<R; j++) {
         if(request[j] > available[j]) {
             printf("Resources not available. Must wait.\n");
             return;
         }
     }
-    // Try allocation temporarily
+   
     for(int j=0; j<R; j++) {
         available[j] -= request[j];
         allocation[p][j] += request[j];
         need[p][j] -= request[j];
     }
-    // Check safety
+    
     if(isSafe()) {
         printf("Request granted (system remains safe).\n");
     } else {
         printf("Request would make system unsafe. Request denied.\n");
-        // Rollback
         for(int j=0; j<R; j++) {
             available[j] += request[j];
             allocation[p][j] -= request[j];
@@ -116,21 +109,15 @@ void requestResources(int p, int request[]) {
     }
 }
 
-// ------------------------------------------------------
-// MAIN PROGRAM
-// ------------------------------------------------------
 int main() {
-    printf("BANKER'S ALGORITHM DEMO\n");
-    // a + b
+
     calculateNeed();
-    // c
     if(isSafe())
         printf("\nSystem is in SAFE state.\n");
     else
         printf("\nSystem is in UNSAFE state.\n");
     
-    // d: Example request (uncomment to test)
-    int req[R] = {1,0,2}; // example request by P1
+    int req[R] = {1,0,2}; 
     printf("\nProcessing Request for P1: (1,0,2)\n");
     requestResources(1, req);
     
